@@ -1,0 +1,29 @@
+{
+    "SumoBrain": {
+        "checkpoints": [
+            {
+                "steps": 2944,
+                "file_path": "results\\ppo\\SumoBrain\\SumoBrain-2944.onnx",
+                "reward": null,
+                "creation_time": 1777313451.5307763,
+                "auxillary_file_paths": [
+                    "results\\ppo\\SumoBrain\\SumoBrain-2944.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 2944,
+            "file_path": "results\\ppo\\SumoBrain.onnx",
+            "reward": null,
+            "creation_time": 1777313451.5307763,
+            "auxillary_file_paths": [
+                "results\\ppo\\SumoBrain\\SumoBrain-2944.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
