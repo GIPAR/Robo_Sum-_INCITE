@@ -40,20 +40,26 @@ public class SumoAgente : Agent
 
     public override void OnEpisodeBegin() 
     {
-        transform.position = posicaoInicial;
-        transform.rotation = rotacaoInicial;
-        
-        rb.linearVelocity = Vector3.zero; 
+        rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // Se estiver usando as rodas, precisamos zerar a rotação delas também
+        if (this.gameObject.name == "RoboLutador") // O seu robô
+        {
+            transform.localPosition = new Vector3(0f, 0.6f, 1.5f);
+            transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        }
+        else 
+        {
+            transform.localPosition = new Vector3(0f, 0.6f, -1.5f);
+            transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+
         if (usarWheelColliders)
         {
             foreach (var roda in rodasEsquerdas) roda.motorTorque = 0f;
             foreach (var roda in rodasDireitas) roda.motorTorque = 0f;
         }
     }
-
     public override void CollectObservations(VectorSensor sensor) 
     {
         if (centroArena != null)
