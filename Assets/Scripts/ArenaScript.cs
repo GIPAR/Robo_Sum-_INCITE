@@ -4,11 +4,9 @@ public class ArenaScript : MonoBehaviour
 {
     public SumoAgente Agente1; 
     public SumoAgente Agente2;
-
-    public float arenaRadius = 15f; 
-
-    public int roundAtual = 1;
+    public bool modoTreino = true;
     public int totalRounds = 3;
+    public int roundAtual = 1;
     public int VitoriasAgente1 = 0;
     public int VitoriasAgente2 = 0;
 
@@ -26,9 +24,7 @@ public class ArenaScript : MonoBehaviour
         Debug.Log($"Round {roundAtual} Finalizado - Vencedor: {(vencedor == Agente1 ? "Agente 1" : "Agente 2")} | Placar: {VitoriasAgente1} x {VitoriasAgente2}");
 
         roundAtual++;
-
-        // Checa se a partida acabou antes de reiniciar os agentes
-        if (roundAtual > totalRounds)
+        if (modoTreino && roundAtual > totalRounds)
         {
             FinalizarPartida();
         }

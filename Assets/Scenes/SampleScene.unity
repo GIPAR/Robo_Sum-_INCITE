@@ -905,6 +905,67 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 641224857}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &662397455
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 662397456}
+  - component: {fileID: 662397457}
+  m_Layer: 0
+  m_Name: Sensor_Borda
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &662397456
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662397455}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0, y: 0, z: 0.51}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1367077956}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &662397457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662397455}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: RayPerceptionSensor
+  m_DetectableTags:
+  - Borda
+  m_RaysPerDirection: 1
+  m_MaxRayDegrees: 20
+  m_SphereCastRadius: 0
+  m_RayLength: 4
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  m_ObservationStacks: 1
+  m_AlternatingRayOrder: 1
+  m_UseBatchedRaycasts: 0
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 0
+  m_EndVerticalOffset: 0
 --- !u!1 &737859353
 GameObject:
   m_ObjectHideFlags: 0
@@ -1285,6 +1346,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 917199637}
+  - component: {fileID: 917199638}
   m_Layer: 0
   m_Name: Dojo
   m_TagString: Untagged
@@ -1311,6 +1373,25 @@ Transform:
   - {fileID: 1022986774}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &917199638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 917199636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5e1846832bdcd74d8334ac70f9e059c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Agente1: {fileID: 1367077958}
+  Agente2: {fileID: 1282911922}
+  modoTreino: 0
+  totalRounds: 3
+  roundAtual: 1
+  VitoriasAgente1: 0
+  VitoriasAgente2: 0
 --- !u!1 &917200794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1605,11 +1686,11 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1080117779
@@ -1721,6 +1802,67 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1149350101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1149350102}
+  - component: {fileID: 1149350103}
+  m_Layer: 0
+  m_Name: Sensor_Borda
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1149350102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1149350101}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 0, y: 0, z: 0.51}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1282911918}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
+--- !u!114 &1149350103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1149350101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: RayPerceptionSensor
+  m_DetectableTags:
+  - Borda
+  m_RaysPerDirection: 1
+  m_MaxRayDegrees: 20
+  m_SphereCastRadius: 0
+  m_RayLength: 4
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  m_ObservationStacks: 1
+  m_AlternatingRayOrder: 1
+  m_UseBatchedRaycasts: 0
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 0
+  m_EndVerticalOffset: 0
 --- !u!1 &1278526592
 GameObject:
   m_ObjectHideFlags: 0
@@ -1843,6 +1985,7 @@ GameObject:
   - component: {fileID: 1282911923}
   - component: {fileID: 1282911922}
   - component: {fileID: 1282911921}
+  - component: {fileID: 1282911924}
   m_Layer: 0
   m_Name: RoboSumo Oponente
   m_TagString: Lutador
@@ -1867,6 +2010,7 @@ Transform:
   - {fileID: 641224858}
   - {fileID: 1365215239}
   - {fileID: 981592345}
+  - {fileID: 1149350102}
   m_Father: {fileID: 917199637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &1282911920
@@ -1926,7 +2070,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 10000
   usarWheelColliders: 0
   forcaMotor: 40
   forcaGiro: 15
@@ -1934,9 +2078,8 @@ MonoBehaviour:
   forcaMagnetica: 15
   rodasEsquerdas: []
   rodasDireitas: []
-  adversario: {fileID: 1367077956}
+  arena: {fileID: 917199638}
   centroArena: {fileID: 1278526595}
-  raioDaArena: 15
 --- !u!114 &1282911923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1950,7 +2093,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 7
+    VectorObservationSize: 9
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -1968,6 +2111,35 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
+--- !u!114 &1282911924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1282911917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: SensoresSumo
+  m_DetectableTags:
+  - Lutador
+  m_RaysPerDirection: 2
+  m_MaxRayDegrees: 60
+  m_SphereCastRadius: 0.5
+  m_RayLength: 20
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  m_ObservationStacks: 1
+  m_AlternatingRayOrder: 1
+  m_UseBatchedRaycasts: 0
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 0.5
+  m_EndVerticalOffset: 0
 --- !u!1 &1283941094
 GameObject:
   m_ObjectHideFlags: 0
@@ -2231,6 +2403,7 @@ GameObject:
   - component: {fileID: 1367077959}
   - component: {fileID: 1367077958}
   - component: {fileID: 1367077957}
+  - component: {fileID: 1367077960}
   m_Layer: 0
   m_Name: RoboSumo
   m_TagString: Lutador
@@ -2282,6 +2455,7 @@ Transform:
   - {fileID: 737859354}
   - {fileID: 811218845}
   - {fileID: 1665150034}
+  - {fileID: 662397456}
   m_Father: {fileID: 917199637}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &1367077957
@@ -2314,7 +2488,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  MaxStep: 10000
   usarWheelColliders: 0
   forcaMotor: 40
   forcaGiro: 15
@@ -2322,9 +2496,8 @@ MonoBehaviour:
   forcaMagnetica: 15
   rodasEsquerdas: []
   rodasDireitas: []
-  adversario: {fileID: 1282911918}
+  arena: {fileID: 917199638}
   centroArena: {fileID: 1278526595}
-  raioDaArena: 15
 --- !u!114 &1367077959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2338,7 +2511,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 7
+    VectorObservationSize: 9
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 2
@@ -2356,6 +2529,35 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
+--- !u!114 &1367077960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367077953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: SensoresSumo
+  m_DetectableTags:
+  - Lutador
+  m_RaysPerDirection: 2
+  m_MaxRayDegrees: 60
+  m_SphereCastRadius: 0.5
+  m_RayLength: 20
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967291
+  m_ObservationStacks: 1
+  m_AlternatingRayOrder: 1
+  m_UseBatchedRaycasts: 0
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
+  m_StartVerticalOffset: 0.5
+  m_EndVerticalOffset: 0
 --- !u!1 &1464892382
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,47 @@
+{
+    "SumoBrain": {
+        "checkpoints": [
+            {
+                "steps": 171616,
+                "file_path": "results\\SumoTeste01\\SumoBrain\\SumoBrain-171616.onnx",
+                "reward": null,
+                "creation_time": 1777484037.1698177,
+                "auxillary_file_paths": [
+                    "results\\SumoTeste01\\SumoBrain\\SumoBrain-171616.pt"
+                ]
+            },
+            {
+                "steps": 181868,
+                "file_path": "results\\SumoTeste01\\SumoBrain\\SumoBrain-181868.onnx",
+                "reward": null,
+                "creation_time": 1778078155.748005,
+                "auxillary_file_paths": [
+                    "results\\SumoTeste01\\SumoBrain\\SumoBrain-181868.pt"
+                ]
+            },
+            {
+                "steps": 192168,
+                "file_path": "results\\SumoTeste01\\SumoBrain\\SumoBrain-192168.onnx",
+                "reward": null,
+                "creation_time": 1778078269.4504778,
+                "auxillary_file_paths": [
+                    "results\\SumoTeste01\\SumoBrain\\SumoBrain-192168.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 192168,
+            "file_path": "results\\SumoTeste01\\SumoBrain.onnx",
+            "reward": null,
+            "creation_time": 1778078269.4504778,
+            "auxillary_file_paths": [
+                "results\\SumoTeste01\\SumoBrain\\SumoBrain-192168.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
