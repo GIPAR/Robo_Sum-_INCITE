@@ -4,17 +4,23 @@ public class ArenaScript : MonoBehaviour
 {
     public SumoAgente Agente1; 
     public SumoAgente Agente2;
+    
+    [Tooltip("Ative para treinar a IA infinitamente. Desative para simular um torneio de 3 rounds.")]
     public bool modoTreino = true;
+    
     public int totalRounds = 3;
     public int roundAtual = 1;
     public int VitoriasAgente1 = 0;
     public int VitoriasAgente2 = 0;
+    private bool roundEmAndamento = true; 
 
     public void IniciarRound(SumoAgente perdedor)
     {
+        if (!roundEmAndamento) return; 
+        roundEmAndamento = false; 
+        
         SumoAgente vencedor = (perdedor == Agente1) ? Agente2 : Agente1;
-
-        // O perdedor caiu ou sofreu punição, e o vencedor ganha sua glória
+        
         perdedor.AddReward(-1f); 
         vencedor.AddReward(1f); 
 
@@ -22,9 +28,8 @@ public class ArenaScript : MonoBehaviour
         else VitoriasAgente2++;
 
         Debug.Log($"Round {roundAtual} Finalizado - Vencedor: {(vencedor == Agente1 ? "Agente 1" : "Agente 2")} | Placar: {VitoriasAgente1} x {VitoriasAgente2}");
-
         roundAtual++;
-        if (modoTreino && roundAtual > totalRounds)
+        if (!modoTreino && roundAtual > totalRounds)
         {
             FinalizarPartida();
         }
@@ -32,7 +37,13 @@ public class ArenaScript : MonoBehaviour
         {
             perdedor.EndEpisode();
             vencedor.EndEpisode();
+            Invoke(nameof(PrepararProximoRound), 0.1f); 
         }
+    }
+
+    private void PrepararProximoRound()
+    {
+        roundEmAndamento = true;
     }
 
     private void FinalizarPartida()
@@ -46,7 +57,6 @@ public class ArenaScript : MonoBehaviour
         else
             Debug.Log("Empate!");
 
-        // Pausa o jogo no editor para você ver os resultados
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #endif

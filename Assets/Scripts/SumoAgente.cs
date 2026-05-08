@@ -26,6 +26,10 @@ public class SumoAgente : Agent
     [Header("Configurações da Arena")]
     public ArenaScript arena;
     public Transform centroArena; 
+    public float raioDaArena = 10f; // Ajuste para o tamanho real do chão da sua arena
+    public float distanciaAlertaBorda = 3f; // O quão perto da borda ele começa a tomar punição
+    public float penalBorda = 0.05f;
+    
     private Rigidbody rb;
     private Vector3 posicaoInicialLocal;
     private Quaternion rotacaoInicialLocal;
@@ -37,12 +41,14 @@ public class SumoAgente : Agent
         rb = GetComponent<Rigidbody>();
         posicaoInicialLocal = transform.localPosition;
         rotacaoInicialLocal = transform.localRotation;
+        
         foreach(GameObject g in GameObject.FindGameObjectsWithTag("Lutador")){
             if(g != gameObject){
                 adversario = g.transform;
                 break;
             }
         }
+        
         if(adversario == null){
             Debug.LogWarning($"[{name}] Nenhum adversário com a tag 'Lutador' foi encontrado!");
         }
@@ -55,12 +61,14 @@ public class SumoAgente : Agent
         transform.localPosition = posicaoInicialLocal;
         transform.localRotation = rotacaoInicialLocal;
         isGrounded = false;
+
         if (usarWheelColliders)
         {
             foreach (var roda in rodasEsquerdas) roda.motorTorque = 0f;
             foreach (var roda in rodasDireitas) roda.motorTorque = 0f;
         }
     }
+
     public override void CollectObservations(VectorSensor sensor) 
     {
         if (centroArena != null)
@@ -104,6 +112,7 @@ public class SumoAgente : Agent
         if(isGrounded){
             rb.AddForce(-transform.up * forcaMagnetica, ForceMode.Force);
         }
+
         if (usarWheelColliders){
             float forcaEsq = (aceleracao + giro) * forcaMotor;
             float forcaDir = (aceleracao - giro) * forcaMotor;
@@ -120,49 +129,88 @@ public class SumoAgente : Agent
             velLocal.x = 0f;
             rb.linearVelocity = transform.TransformDirection(velLocal);
         }
+
+        // --- SISTEMA DE RECOMPENSAS E PUNIÇÕES ---
+        
+        // 1. Punição por tempo (incentiva a agir rápido)
+        AddReward(-0.0005f); 
+
         if (adversario != null){
-            AddReward(-Vector3.Distance(transform.localPosition, adversario.localPosition)*0.001f);
+            // 2. Recompensa por se aproximar do adversário
+            AddReward(-Vector3.Distance(transform.localPosition, adversario.localPosition) * 0.001f);
+            
+            // 3. Recompensa por olhar para o adversário
             Vector3 direcaoAdversario = (adversario.localPosition - transform.localPosition).normalized;
             float alinhamento = Vector3.Dot(transform.forward, direcaoAdversario);
             if(alinhamento > 0.8f){
                 AddReward(0.002f);
             }
         }
-        AddReward(-0.0005f); 
-        if(isGrounded && transform.localPosition.y < -2f){
-            AddReward(-1f);
-            EndEpisode();
-        }   
+
+        // 4. Nova verificação simplificada da borda
+        VerificarDistanciaBorda();
+
+        // Removida a punição de (y < -2f) daqui, pois a ArenaScript já vai dar a punição
+        // de -1f e encerrar o episódio quando o OnTriggerEnter da borda for ativado.
     }
+
+    // Método muito mais leve e seguro que os Raycasts manuais
+    private void VerificarDistanciaBorda()
+    {
+        if (centroArena == null) return;
+
+        // Calcula a distância atual do robô até o centro
+        float distanciaAtual = Vector3.Distance(transform.localPosition, centroArena.localPosition);
+
+        // Se a distância for maior que a zona segura, ele está perto da borda
+        float limiteSeguro = raioDaArena - distanciaAlertaBorda;
+
+        if (distanciaAtual > limiteSeguro)
+        {
+            // Quanto mais perto da borda (passando do limite), maior a punição contínua
+            float quaoLongePassou = distanciaAtual - limiteSeguro;
+            float penalidade = (quaoLongePassou / distanciaAlertaBorda) * penalBorda;
+            
+            AddReward(-penalidade);
+        }
+    }
+
+    // Adicionado o FixedUpdate para garantir que o visual das rodas atualize
+    private void FixedUpdate()
+    {
+        AtualizarVisualRodas();
+    }
+
     private void AtualizarVisualRodas(){
         if (usarWheelColliders)
         {
-            if(!usarWheelColliders) return;
             AtualizarMeshesRodas(rodasEsquerdas, visualRodasEsquerdas);
             AtualizarMeshesRodas(rodasDireitas, visualRodasDireitas);
         }
     }
+
     private void AtualizarMeshesRodas(WheelCollider[] colliders, Transform[] visuals)
     {
-        if(colliders == null || visuals ==null) return;
+        if(colliders == null || visuals == null) return;
         int count = Mathf.Min(colliders.Length, visuals.Length);
         for(int i=0; i < count; i++)
         {
             if(colliders[i] == null || visuals[i] == null) continue;
             colliders[i].GetWorldPose(out Vector3 pos, out Quaternion rot);
             visuals[i].SetPositionAndRotation(pos, rot);
-
         }
     }
+
     private void OnTriggerEnter(Collider other){
+        // Delegação limpa: Bateu na borda, avisa o juiz (ArenaScript) e deixa ele decidir.
         if(other.CompareTag("Borda")){
             if (arena != null)
             {
-                arena.IniciarRound(this);
+                arena.IniciarRound(this); // this = o robô que caiu (perdedor)
             }
             else
             {
-                Debug.LogWarning($"[{name}] O script 'ArenaScript' não está atribuído no inspetor!");
+                Debug.LogWarning($"[{name}] O script 'ArenaScript' não está atribuído!");
                 AddReward(-1f);
                 EndEpisode();
             }
@@ -174,18 +222,16 @@ public class SumoAgente : Agent
             isGrounded = true;
         }
     }
+
     private void OnCollisionExit(Collision colisao){
         if(colisao.collider.CompareTag("Piso")){
             isGrounded = false;
         }
     }
+
     public override void Heuristic (in ActionBuffers actionsOut){
         var ac = actionsOut.ContinuousActions;
         ac[0]=Input.GetAxis("Vertical");
         ac[1]=Input.GetAxis("Horizontal");
-    }
-    public void AdversarioCaiu(){
-        AddReward(+1f);
-        EndEpisode();
     }
 }
