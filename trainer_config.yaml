@@ -10,19 +10,26 @@ behaviors:
       lambd: 0.95
       num_epoch: 3
       learning_rate_schedule: linear
+    
     network_settings:
       normalize: true
-      hidden_units: 256
-      num_layers: 2
+      hidden_units: 512     # UPGRADE: De 256 para 512. Mais neurónios para processar o peso e o motor aleatórios.
+      num_layers: 3         # UPGRADE: De 2 para 3. Permite a criação de táticas mais complexas (como esquivas).
+    
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
+      curiosity:            # NOVO: Injeção de curiosidade. Recompensa a IA por explorar novas físicas de impacto.
+        strength: 0.02
+        gamma: 0.99
+        encoding_size: 256
+        learning_rate: 3.0e-4
     
     # Configuracoes de Self-Play (Treino contra si mesmo)
     self_play:
       save_steps: 50000
-      team_change: 200000
+      team_change: 100000   # UPGRADE: Reduzido de 200k para 100k. Força a adaptação tática mais cedo.
       swap_steps: 10000
       window: 10
       play_against_latest_model_ratio: 0.5

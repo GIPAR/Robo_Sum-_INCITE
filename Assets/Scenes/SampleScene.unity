@@ -1881,7 +1881,7 @@ Transform:
   m_GameObject: {fileID: 1282911917}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.6, z: -1.5}
+  m_LocalPosition: {x: 0, y: 0.6, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1960,7 +1960,7 @@ MonoBehaviour:
   visualRodasDireitas: []
   arena: {fileID: 917199638}
   centroArena: {fileID: 1278526595}
-  raioDaArena: 4.5
+  raioDaArena: 10
   distanciaAlertaBorda: 3
   penalBorda: 0.05
 --- !u!114 &1282911923
@@ -1989,7 +1989,7 @@ MonoBehaviour:
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: SumoBrain
-  TeamId: 0
+  TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
@@ -2009,7 +2009,7 @@ MonoBehaviour:
   m_SensorName: SensoresSumo
   m_DetectableTags:
   - Lutador
-  m_RaysPerDirection: 2
+  m_RaysPerDirection: 3
   m_MaxRayDegrees: 60
   m_SphereCastRadius: 0.5
   m_RayLength: 20
@@ -2438,7 +2438,7 @@ Transform:
   m_GameObject: {fileID: 1367077953}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0.6, z: 1.5}
+  m_LocalPosition: {x: 0, y: 0.6, z: 4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2478,7 +2478,7 @@ MonoBehaviour:
   agentParameters:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
-  MaxStep: 10000
+  MaxStep: 1000
   usarWheelColliders: 0
   forcaMotor: 40
   forcaGiro: 15
@@ -2519,7 +2519,7 @@ MonoBehaviour:
   m_InferenceDevice: 0
   m_BehaviorType: 0
   m_BehaviorName: SumoBrain
-  TeamId: 0
+  TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
@@ -2539,7 +2539,7 @@ MonoBehaviour:
   m_SensorName: SensoresSumo
   m_DetectableTags:
   - Lutador
-  m_RaysPerDirection: 2
+  m_RaysPerDirection: 3
   m_MaxRayDegrees: 60
   m_SphereCastRadius: 0.5
   m_RayLength: 20

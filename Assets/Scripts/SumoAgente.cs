@@ -6,7 +6,6 @@ using Unity.MLAgents.Actuators;
 public class SumoAgente : Agent
 {
     [Header("Modo de Movimentação")]
-    [Tooltip("Marque para usar os WheelColliders. Desmarque para usar física simples (Arcade).")]
     public bool usarWheelColliders = false;
 
     [Header("Especificações do Agente")]
@@ -25,57 +24,57 @@ public class SumoAgente : Agent
 
     [Header("Configurações da Arena")]
     public ArenaScript arena;
-    public Transform centroArena; 
-    public float raioDaArena = 10f; // Ajuste para o tamanho real do chão da sua arena
-    public float distanciaAlertaBorda = 3f; // O quão perto da borda ele começa a tomar punição
-    public float penalBorda = 0.05f;
-    
+    public Transform centroArena;
+    public float raioDaArena = 10f;
+
     private Rigidbody rb;
     private Vector3 posicaoInicialLocal;
     private Quaternion rotacaoInicialLocal;
     private Transform adversario;
     private bool isGrounded;
+    private bool emContatoComAdversario;
 
-    public override void Initialize() 
+    public override void Initialize()
     {
         rb = GetComponent<Rigidbody>();
         posicaoInicialLocal = transform.localPosition;
         rotacaoInicialLocal = transform.localRotation;
-        
-        foreach(GameObject g in GameObject.FindGameObjectsWithTag("Lutador")){
-            if(g != gameObject){
-                adversario = g.transform;
-                break;
-            }
-        }
-        
-        if(adversario == null){
-            Debug.LogWarning($"[{name}] Nenhum adversário com a tag 'Lutador' foi encontrado!");
+
+        foreach (GameObject g in GameObject.FindGameObjectsWithTag("Lutador"))
+        {
+            if (g != gameObject) { adversario = g.transform; break; }
         }
     }
 
-    public override void OnEpisodeBegin() 
+    public override void OnEpisodeBegin()
     {
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.localPosition = posicaoInicialLocal;
-        transform.localRotation = rotacaoInicialLocal;
+        
+        float anguloAleatorio = Random.Range(-20f, 20f);
+        transform.localRotation = rotacaoInicialLocal * Quaternion.Euler(0, anguloAleatorio, 0);
+        
+        rb.mass = Random.Range(0.9f, 1.1f);
+        forcaMotor = Random.Range(35f, 45f);
         isGrounded = false;
+        emContatoComAdversario = false;
 
         if (usarWheelColliders)
         {
             foreach (var roda in rodasEsquerdas) roda.motorTorque = 0f;
-            foreach (var roda in rodasDireitas) roda.motorTorque = 0f;
+            foreach (var roda in rodasDireitas)  roda.motorTorque = 0f;
         }
     }
 
-    public override void CollectObservations(VectorSensor sensor) 
+    // AQUI ESTÃO OS 9 OLHOS DA IA
+    public override void CollectObservations(VectorSensor sensor)
     {
         if (centroArena != null)
         {
             Vector3 minhaDistanciaDoCentro = transform.localPosition - centroArena.localPosition;
-            sensor.AddObservation(minhaDistanciaDoCentro.x);
-            sensor.AddObservation(minhaDistanciaDoCentro.z);
+            sensor.AddObservation(minhaDistanciaDoCentro.x / raioDaArena);
+            sensor.AddObservation(minhaDistanciaDoCentro.z / raioDaArena);
         }
         else
         {
@@ -83,20 +82,20 @@ public class SumoAgente : Agent
             sensor.AddObservation(0f);
         }
 
-        Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity); 
-        sensor.AddObservation(velLocal.x);
-        sensor.AddObservation(velLocal.z);
+        Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity);
+        sensor.AddObservation(velLocal.x / velocidadeMaxima);
+        sensor.AddObservation(velLocal.z / velocidadeMaxima);
         sensor.AddObservation(transform.forward.x);
         sensor.AddObservation(transform.forward.z);
 
         if (adversario != null)
         {
             Vector3 dirAdversario = adversario.localPosition - transform.localPosition;
-            sensor.AddObservation(dirAdversario.normalized.x); 
+            sensor.AddObservation(dirAdversario.normalized.x);
             sensor.AddObservation(dirAdversario.normalized.z);
-            sensor.AddObservation(dirAdversario.magnitude); 
+            sensor.AddObservation(dirAdversario.magnitude / (raioDaArena * 2f));
         }
-        else 
+        else
         {
             sensor.AddObservation(0f);
             sensor.AddObservation(0f);
@@ -104,134 +103,130 @@ public class SumoAgente : Agent
         }
     }
 
-    public override void OnActionReceived(ActionBuffers actions) 
+    public override void OnActionReceived(ActionBuffers actions)
     {
-        float aceleracao = actions.ContinuousActions[0]; 
-        float giro = actions.ContinuousActions[1]; 
+        float aceleracao = actions.ContinuousActions[0];
+        float giro       = actions.ContinuousActions[1];
 
-        if(isGrounded){
+        if (isGrounded)
             rb.AddForce(-transform.up * forcaMagnetica, ForceMode.Force);
-        }
 
-        if (usarWheelColliders){
+        if (usarWheelColliders)
+        {
             float forcaEsq = (aceleracao + giro) * forcaMotor;
             float forcaDir = (aceleracao - giro) * forcaMotor;
             foreach (var roda in rodasEsquerdas) roda.motorTorque = forcaEsq;
-            foreach (var roda in rodasDireitas) roda.motorTorque = forcaDir;
+            foreach (var roda in rodasDireitas)  roda.motorTorque = forcaDir;
         }
-        else{
-            if (rb.linearVelocity.magnitude < velocidadeMaxima) 
-            {
-                rb.AddRelativeForce(Vector3.forward * aceleracao * forcaMotor);
-                rb.AddRelativeTorque(Vector3.up * giro * forcaGiro);
-            }
+        else
+        {
+            float fatorVelocidade = Mathf.Clamp01(1f - (rb.linearVelocity.magnitude / velocidadeMaxima));
+            
+            rb.AddRelativeForce(Vector3.forward * aceleracao * forcaMotor * fatorVelocidade);
+            rb.AddRelativeTorque(Vector3.up * giro * forcaGiro);
+            
             Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity);
-            velLocal.x = 0f;
+            velLocal.x *= 0.85f; 
             rb.linearVelocity = transform.TransformDirection(velLocal);
         }
 
-        // --- SISTEMA DE RECOMPENSAS E PUNIÇÕES ---
-        
-        // 1. Punição por tempo (incentiva a agir rápido)
-        AddReward(-0.0005f); 
+        // Imposto de tempo
+        AddReward(-0.001f);
 
-        if (adversario != null){
-            // 2. Recompensa por se aproximar do adversário
-            AddReward(-Vector3.Distance(transform.localPosition, adversario.localPosition) * 0.001f);
-            
-            // 3. Recompensa por olhar para o adversário
-            Vector3 direcaoAdversario = (adversario.localPosition - transform.localPosition).normalized;
-            float alinhamento = Vector3.Dot(transform.forward, direcaoAdversario);
-            if(alinhamento > 0.8f){
-                AddReward(0.002f);
+        if (adversario != null)
+        {
+            float distancia = Vector3.Distance(transform.localPosition, adversario.localPosition);
+            float velocidadeAtual = rb.linearVelocity.magnitude;
+
+            // Recompensa de Proximidade Dinâmica (quebra do platô)
+            if (velocidadeAtual > 0.5f)
+            {
+                float proximidade = 1f - Mathf.Clamp01(distancia / (raioDaArena * 2f));
+                AddReward(proximidade * 0.0005f);
+            }
+
+            if (!emContatoComAdversario)
+            {
+                Vector3 dirAdversario = (adversario.localPosition - transform.localPosition).normalized;
+                float velocidadeDeAproximacao = Vector3.Dot(rb.linearVelocity, dirAdversario);
+                
+                if (velocidadeDeAproximacao > 0.5f)
+                {
+                    AddReward(velocidadeDeAproximacao * 0.002f); 
+                }
             }
         }
-
-        // 4. Nova verificação simplificada da borda
-        VerificarDistanciaBorda();
-
-        // Removida a punição de (y < -2f) daqui, pois a ArenaScript já vai dar a punição
-        // de -1f e encerrar o episódio quando o OnTriggerEnter da borda for ativado.
     }
 
-    // Método muito mais leve e seguro que os Raycasts manuais
-    private void VerificarDistanciaBorda()
+    private void FixedUpdate() => AtualizarVisualRodas();
+
+    private void AtualizarVisualRodas()
     {
-        if (centroArena == null) return;
-
-        // Calcula a distância atual do robô até o centro
-        float distanciaAtual = Vector3.Distance(transform.localPosition, centroArena.localPosition);
-
-        // Se a distância for maior que a zona segura, ele está perto da borda
-        float limiteSeguro = raioDaArena - distanciaAlertaBorda;
-
-        if (distanciaAtual > limiteSeguro)
-        {
-            // Quanto mais perto da borda (passando do limite), maior a punição contínua
-            float quaoLongePassou = distanciaAtual - limiteSeguro;
-            float penalidade = (quaoLongePassou / distanciaAlertaBorda) * penalBorda;
-            
-            AddReward(-penalidade);
-        }
-    }
-
-    // Adicionado o FixedUpdate para garantir que o visual das rodas atualize
-    private void FixedUpdate()
-    {
-        AtualizarVisualRodas();
-    }
-
-    private void AtualizarVisualRodas(){
-        if (usarWheelColliders)
-        {
-            AtualizarMeshesRodas(rodasEsquerdas, visualRodasEsquerdas);
-            AtualizarMeshesRodas(rodasDireitas, visualRodasDireitas);
-        }
+        if (!usarWheelColliders) return;
+        AtualizarMeshesRodas(rodasEsquerdas, visualRodasEsquerdas);
+        AtualizarMeshesRodas(rodasDireitas,  visualRodasDireitas);
     }
 
     private void AtualizarMeshesRodas(WheelCollider[] colliders, Transform[] visuals)
     {
-        if(colliders == null || visuals == null) return;
+        if (colliders == null || visuals == null) return;
         int count = Mathf.Min(colliders.Length, visuals.Length);
-        for(int i=0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            if(colliders[i] == null || visuals[i] == null) continue;
+            if (colliders[i] == null || visuals[i] == null) continue;
             colliders[i].GetWorldPose(out Vector3 pos, out Quaternion rot);
             visuals[i].SetPositionAndRotation(pos, rot);
         }
     }
 
-    private void OnTriggerEnter(Collider other){
-        // Delegação limpa: Bateu na borda, avisa o juiz (ArenaScript) e deixa ele decidir.
-        if(other.CompareTag("Borda")){
-            if (arena != null)
-            {
-                arena.IniciarRound(this); // this = o robô que caiu (perdedor)
-            }
-            else
-            {
-                Debug.LogWarning($"[{name}] O script 'ArenaScript' não está atribuído!");
-                AddReward(-1f);
-                EndEpisode();
-            }
-        }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Borda")) return;
+
+        if (arena != null)
+            arena.IniciarRound(this);
     }
 
-    private void OnCollisionEnter(Collision colisao){
-        if(colisao.collider.CompareTag("Piso")){
+    private void OnCollisionEnter(Collision colisao)
+    {
+        if (colisao.collider.CompareTag("Piso"))
             isGrounded = true;
+
+        if (colisao.collider.CompareTag("Lutador"))
+        {
+            emContatoComAdversario = true;
+            float impacto = Mathf.Clamp(rb.linearVelocity.magnitude, 0f, 5f);
+            AddReward(impacto * 0.01f);
         }
     }
 
-    private void OnCollisionExit(Collision colisao){
-        if(colisao.collider.CompareTag("Piso")){
+    private void OnCollisionStay(Collision colisao)
+    {
+        if (colisao.collider.CompareTag("Lutador") && centroArena != null)
+        {
+            Vector3 direcaoParaBorda = (colisao.transform.localPosition - centroArena.localPosition).normalized;
+            float forcaEmpurraoBorda = Vector3.Dot(rb.linearVelocity, direcaoParaBorda);
+            
+            if (forcaEmpurraoBorda > 0.1f)
+            {
+                AddReward(Mathf.Clamp(forcaEmpurraoBorda * 0.0003f, 0f, 0.001f));
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision colisao)
+    {
+        if (colisao.collider.CompareTag("Piso"))
             isGrounded = false;
-        }
+
+        if (colisao.collider.CompareTag("Lutador"))
+            emContatoComAdversario = false;
     }
 
-    public override void Heuristic (in ActionBuffers actionsOut){
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
         var ac = actionsOut.ContinuousActions;
-        ac[0]=Input.GetAxis("Vertical");
-        ac[1]=Input.GetAxis("Horizontal");
+        ac[0] = Input.GetAxis("Vertical");
+        ac[1] = Input.GetAxis("Horizontal");
     }
 }

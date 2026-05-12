@@ -1,0 +1,30 @@
+{
+    "SumoBrain": {
+        "elo": 276.123026937987,
+        "checkpoints": [
+            {
+                "steps": 438210,
+                "file_path": "results\\Sumo_Treino_Definitivo\\SumoBrain\\SumoBrain-438210.onnx",
+                "reward": 0.6201633026187376,
+                "creation_time": 1778607784.9168112,
+                "auxillary_file_paths": [
+                    "results\\Sumo_Treino_Definitivo\\SumoBrain\\SumoBrain-438210.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 438210,
+            "file_path": "results\\Sumo_Treino_Definitivo\\SumoBrain.onnx",
+            "reward": 0.6201633026187376,
+            "creation_time": 1778607784.9168112,
+            "auxillary_file_paths": [
+                "results\\Sumo_Treino_Definitivo\\SumoBrain\\SumoBrain-438210.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
