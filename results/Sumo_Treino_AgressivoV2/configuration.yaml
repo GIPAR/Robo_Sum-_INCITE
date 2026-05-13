@@ -3,8 +3,8 @@ behaviors:
   SumoBrain:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 2048
-      buffer_size: 20480
+      batch_size: 20480
+      buffer_size: 40960
       learning_rate: 0.0003
       beta: 0.005
       epsilon: 0.2
@@ -37,30 +37,30 @@ behaviors:
           deterministic: false
       curiosity:
         gamma: 0.99
-        strength: 0.02
+        strength: 0.01
         network_settings:
           normalize: false
-          hidden_units: 256
+          hidden_units: 512
           num_layers: 2
           vis_encode_type: simple
           memory: null
           goal_conditioning_type: hyper
           deterministic: false
         learning_rate: 0.0003
-        encoding_size: 256
+        encoding_size: 512
     init_path: null
     keep_checkpoints: 5
     even_checkpoints: false
     max_steps: 5000000
-    time_horizon: 64
+    time_horizon: 512
     summary_freq: 20000
     threaded: false
     self_play:
-      save_steps: 50000
+      save_steps: 20000
       team_change: 100000
       swap_steps: 10000
-      window: 10
-      play_against_latest_model_ratio: 0.5
+      window: 15
+      play_against_latest_model_ratio: 0.3
       initial_elo: 1200.0
     behavioral_cloning: null
 env_settings:
@@ -85,7 +85,7 @@ engine_settings:
   no_graphics_monitor: false
 environment_parameters: null
 checkpoint_settings:
-  run_id: Sumo_Treino_Definitivo
+  run_id: Sumo_Treino_AgressivoV2
   initialize_from: null
   load_model: false
   resume: false

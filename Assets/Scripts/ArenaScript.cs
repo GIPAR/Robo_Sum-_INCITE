@@ -10,10 +10,10 @@ public class ArenaScript : MonoBehaviour
     public bool modoTreino = true;
     public int totalRounds = 3;
 
-    [Header("Regras de Tempo (Anti-Empate)")]
-    [Tooltip("Tempo em segundos até o round ser declarado empate.")]
-    public float tempoMaximoRound = 60f;
-    private float tempoAtual = 0f;
+    [Header("Regras de Tempo (Anti-Empate por Steps)")]
+    [Tooltip("Quantidade máxima de passos físicos (FixedUpdate) até o round ser declarado empate. 1500 passos = ~30s de simulação.")]
+    public int maxStepsPorRound = 1500; 
+    private int stepsAtual = 0;
 
     public int roundAtual = 1;
     public int VitoriasDestino = 0;
@@ -22,13 +22,11 @@ public class ArenaScript : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // O relógio só corre se a luta estiver valendo
         if (roundEmAndamento)
         {
-            tempoAtual += Time.fixedDeltaTime;
+            stepsAtual++;
 
-            // Se o tempo esgotar, o Juiz (Arena) declara empate
-            if (tempoAtual >= tempoMaximoRound)
+            if (stepsAtual >= maxStepsPorRound)
             {
                 DeclararEmpate();
             }
@@ -53,17 +51,15 @@ public class ArenaScript : MonoBehaviour
         FinalizarOuProximo();
     }
 
-    // NOVA FUNÇÃO: O Juiz pune a inatividade
     public void DeclararEmpate()
     {
         if (!roundEmAndamento) return;
         roundEmAndamento = false;
 
-        // Punição colossal para ambos! Empatar é inaceitável.
         Destino.AddReward(-0.5f);
         Golden.AddReward(-0.5f);
 
-        Debug.Log($"Round {roundAtual} Finalizado - EMPATE por tempo!");
+        Debug.Log($"Round {roundAtual} Finalizado - EMPATE por limite de passos!");
 
         FinalizarOuProximo();
     }
@@ -86,7 +82,7 @@ public class ArenaScript : MonoBehaviour
 
     private void PrepararProximoRound()
     {
-        tempoAtual = 0f; // Zera o relógio para o próximo round
+        stepsAtual = 0; 
         roundEmAndamento = true;
     }
 

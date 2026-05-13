@@ -2,8 +2,8 @@ behaviors:
   SumoBrain: 
     trainer_type: ppo
     hyperparameters:
-      batch_size: 2048
-      buffer_size: 20480
+      batch_size: 20480
+      buffer_size: 40960
       learning_rate: 3.0e-4
       beta: 5.0e-3
       epsilon: 0.2
@@ -13,28 +13,26 @@ behaviors:
     
     network_settings:
       normalize: true
-      hidden_units: 512     # UPGRADE: De 256 para 512. Mais neurónios para processar o peso e o motor aleatórios.
-      num_layers: 3         # UPGRADE: De 2 para 3. Permite a criação de táticas mais complexas (como esquivas).
-    
+      hidden_units: 512     
+      num_layers: 3         
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-      curiosity:            # NOVO: Injeção de curiosidade. Recompensa a IA por explorar novas físicas de impacto.
-        strength: 0.02
+      curiosity:            
+        strength: 0.01
         gamma: 0.99
-        encoding_size: 256
+        encoding_size: 512
         learning_rate: 3.0e-4
-    
-    # Configuracoes de Self-Play (Treino contra si mesmo)
+
     self_play:
-      save_steps: 50000
-      team_change: 100000   # UPGRADE: Reduzido de 200k para 100k. Força a adaptação tática mais cedo.
+      save_steps: 20000 
+      team_change: 100000  
       swap_steps: 10000
-      window: 10
-      play_against_latest_model_ratio: 0.5
+      window: 15
+      play_against_latest_model_ratio: 0.3
       initial_elo: 1200.0
 
     max_steps: 5000000
-    time_horizon: 64
+    time_horizon: 512
     summary_freq: 20000

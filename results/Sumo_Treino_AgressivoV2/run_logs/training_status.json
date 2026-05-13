@@ -1,0 +1,39 @@
+{
+    "SumoBrain": {
+        "checkpoints": [
+            {
+                "steps": 499787,
+                "file_path": "results\\Sumo_Treino_AgressivoV2\\SumoBrain\\SumoBrain-499787.onnx",
+                "reward": 0.45711179013763154,
+                "creation_time": 1778692504.6238925,
+                "auxillary_file_paths": [
+                    "results\\Sumo_Treino_AgressivoV2\\SumoBrain\\SumoBrain-499787.pt"
+                ]
+            },
+            {
+                "steps": 850970,
+                "file_path": "results\\Sumo_Treino_AgressivoV2\\SumoBrain\\SumoBrain-850970.onnx",
+                "reward": 0.8491827067716614,
+                "creation_time": 1778694359.4188447,
+                "auxillary_file_paths": [
+                    "results\\Sumo_Treino_AgressivoV2\\SumoBrain\\SumoBrain-850970.pt"
+                ]
+            }
+        ],
+        "elo": -120.07274948280285,
+        "final_checkpoint": {
+            "steps": 850970,
+            "file_path": "results\\Sumo_Treino_AgressivoV2\\SumoBrain.onnx",
+            "reward": 0.8491827067716614,
+            "creation_time": 1778694359.4188447,
+            "auxillary_file_paths": [
+                "results\\Sumo_Treino_AgressivoV2\\SumoBrain\\SumoBrain-850970.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

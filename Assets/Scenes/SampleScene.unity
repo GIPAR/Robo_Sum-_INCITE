@@ -1325,13 +1325,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e1846832bdcd74d8334ac70f9e059c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Agente1: {fileID: 1367077958}
-  Agente2: {fileID: 1282911922}
+  Destino: {fileID: 1367077958}
+  Golden: {fileID: 1282911922}
   modoTreino: 1
   totalRounds: 3
+  tempoMaximoRound: 45
   roundAtual: 1
-  VitoriasAgente1: 0
-  VitoriasAgente2: 0
+  VitoriasDestino: 0
+  VitoriasGolden: 0
 --- !u!1 &917200794
 GameObject:
   m_ObjectHideFlags: 0
@@ -1961,8 +1962,6 @@ MonoBehaviour:
   arena: {fileID: 917199638}
   centroArena: {fileID: 1278526595}
   raioDaArena: 10
-  distanciaAlertaBorda: 3
-  penalBorda: 0.05
 --- !u!114 &1282911923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2009,14 +2008,15 @@ MonoBehaviour:
   m_SensorName: SensoresSumo
   m_DetectableTags:
   - Lutador
-  m_RaysPerDirection: 3
-  m_MaxRayDegrees: 60
+  - Borda
+  m_RaysPerDirection: 7
+  m_MaxRayDegrees: 100
   m_SphereCastRadius: 0.5
   m_RayLength: 20
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294967291
-  m_ObservationStacks: 1
+  m_ObservationStacks: 3
   m_AlternatingRayOrder: 1
   m_UseBatchedRaycasts: 0
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
@@ -2491,8 +2491,6 @@ MonoBehaviour:
   arena: {fileID: 917199638}
   centroArena: {fileID: 1278526595}
   raioDaArena: 10
-  distanciaAlertaBorda: 3
-  penalBorda: 0.05
 --- !u!114 &1367077959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2539,14 +2537,15 @@ MonoBehaviour:
   m_SensorName: SensoresSumo
   m_DetectableTags:
   - Lutador
-  m_RaysPerDirection: 3
-  m_MaxRayDegrees: 60
+  - Borda
+  m_RaysPerDirection: 7
+  m_MaxRayDegrees: 100
   m_SphereCastRadius: 0.5
   m_RayLength: 20
   m_RayLayerMask:
     serializedVersion: 2
     m_Bits: 4294967291
-  m_ObservationStacks: 1
+  m_ObservationStacks: 3
   m_AlternatingRayOrder: 1
   m_UseBatchedRaycasts: 0
   rayHitColor: {r: 1, g: 0, b: 0, a: 1}
