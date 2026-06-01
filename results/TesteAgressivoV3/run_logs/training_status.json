@@ -1,0 +1,66 @@
+{
+    "SumoBrain": {
+        "checkpoints": [
+            {
+                "steps": 1999859,
+                "file_path": "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-1999859.onnx",
+                "reward": 0.8547255091325066,
+                "creation_time": 1779121074.7387033,
+                "auxillary_file_paths": [
+                    "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-1999859.pt"
+                ]
+            },
+            {
+                "steps": 2438432,
+                "file_path": "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2438432.onnx",
+                "reward": 0.9349905689331618,
+                "creation_time": 1779124052.728971,
+                "auxillary_file_paths": [
+                    "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2438432.pt"
+                ]
+            },
+            {
+                "steps": 2499896,
+                "file_path": "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2499896.onnx",
+                "reward": 0.9336614265390064,
+                "creation_time": 1779125170.3262556,
+                "auxillary_file_paths": [
+                    "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2499896.pt"
+                ]
+            },
+            {
+                "steps": 2999988,
+                "file_path": "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2999988.onnx",
+                "reward": 1.3625262926545847,
+                "creation_time": 1779127527.0980725,
+                "auxillary_file_paths": [
+                    "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-2999988.pt"
+                ]
+            },
+            {
+                "steps": 3497216,
+                "file_path": "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-3497216.onnx",
+                "reward": 1.1969395021162927,
+                "creation_time": 1779129906.3219078,
+                "auxillary_file_paths": [
+                    "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-3497216.pt"
+                ]
+            }
+        ],
+        "elo": -140.22962829593422,
+        "final_checkpoint": {
+            "steps": 3497216,
+            "file_path": "results\\TesteAgressivoV3\\SumoBrain.onnx",
+            "reward": 1.1969395021162927,
+            "creation_time": 1779129906.3219078,
+            "auxillary_file_paths": [
+                "results\\TesteAgressivoV3\\SumoBrain\\SumoBrain-3497216.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

@@ -1,8 +1,8 @@
 behaviors:
-  SumoBrain: 
+  SumoBrain:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 20480
+      batch_size: 2048
       buffer_size: 40960
       learning_rate: 3.0e-4
       beta: 5.0e-3
@@ -10,29 +10,31 @@ behaviors:
       lambd: 0.95
       num_epoch: 3
       learning_rate_schedule: linear
-    
+      beta_schedule: linear
+
     network_settings:
       normalize: true
-      hidden_units: 512     
-      num_layers: 3         
+      hidden_units: 512
+      num_layers: 3
+
     reward_signals:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-      curiosity:            
+      curiosity:
         strength: 0.01
         gamma: 0.99
-        encoding_size: 512
-        learning_rate: 3.0e-4
+        encoding_size: 256
+        learning_rate: 1.0e-4
 
     self_play:
-      save_steps: 20000 
-      team_change: 100000  
+      save_steps: 20000
+      team_change: 100000
       swap_steps: 10000
       window: 15
       play_against_latest_model_ratio: 0.3
       initial_elo: 1200.0
 
-    max_steps: 5000000
+    max_steps: 10000000
     time_horizon: 512
     summary_freq: 20000
