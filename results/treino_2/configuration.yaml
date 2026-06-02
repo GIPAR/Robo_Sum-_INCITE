@@ -3,8 +3,8 @@ behaviors:
   SumoBrain:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 20480
-      buffer_size: 204800
+      batch_size: 2048
+      buffer_size: 40960
       learning_rate: 0.0003
       beta: 0.005
       epsilon: 0.2
@@ -17,8 +17,8 @@ behaviors:
     checkpoint_interval: 500000
     network_settings:
       normalize: true
-      hidden_units: 256
-      num_layers: 2
+      hidden_units: 512
+      num_layers: 3
       vis_encode_type: simple
       memory: null
       goal_conditioning_type: hyper
@@ -37,17 +37,17 @@ behaviors:
           deterministic: false
       curiosity:
         gamma: 0.99
-        strength: 0.01
+        strength: 0.015
         network_settings:
           normalize: false
-          hidden_units: 64
+          hidden_units: 512
           num_layers: 2
           vis_encode_type: simple
           memory: null
           goal_conditioning_type: hyper
           deterministic: false
         learning_rate: 0.0001
-        encoding_size: 64
+        encoding_size: 512
     init_path: null
     keep_checkpoints: 5
     even_checkpoints: false
@@ -85,11 +85,11 @@ engine_settings:
   no_graphics_monitor: false
 environment_parameters: null
 checkpoint_settings:
-  run_id: TesteFisica
+  run_id: treino_2
   initialize_from: null
   load_model: false
-  resume: true
-  force: false
+  resume: false
+  force: true
   train_model: false
   inference: false
   results_dir: results

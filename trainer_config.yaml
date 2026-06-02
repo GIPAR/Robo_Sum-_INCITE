@@ -22,9 +22,9 @@ behaviors:
         gamma: 0.99
         strength: 1.0
       curiosity:
-        strength: 0.01
+        strength: 0.015
         gamma: 0.99
-        encoding_size: 256
+        encoding_size: 512
         learning_rate: 1.0e-4
 
     self_play:

@@ -7,7 +7,7 @@ public class SumoAgente : Agent
 {
     [Header("Especificações do Agente")]
     public float forcaMotor       = 280f;
-    public float forcaGiro        = 15f; 
+    public float forcaGiro        = 15f;
     public float velocidadeMaxima = 8f;
     public float forcaMagnetica   = 15f;
 
@@ -23,24 +23,35 @@ public class SumoAgente : Agent
     public float recompensaContatoContinuo = 0.001f;
     public float recompensaEmbate          = 0.01f;
 
+    [Header("Exploração")]
+    [Tooltip("Distância mínima para contar como nova área explorada.")]
+    public float distanciaExploracaoMinima = 1.5f;
+
     // ── Privados ──
-    private Rigidbody  rb;
-    private Rigidbody  rbAdversario;
-    private Transform  adversario;
-    private Vector3    posicaoInicialLocal;
-    private Quaternion rotacaoInicialLocal;
-    private Vector3    posAdversarioAnterior;
-    private bool       emContatoComAdversario;
-    private bool       podeMovimentar = false;
-    
+    private Rigidbody      rb;
+    private Rigidbody      rbAdversario;
+    private Transform      adversario;
+    private Vector3        posicaoInicialLocal;
+    private Quaternion     rotacaoInicialLocal;
+    private Vector3        posAdversarioAnterior;
+    private Vector3        ultimaPosicaoExplorada;
+    private bool           emContatoComAdversario;
+    private bool           podeMovimentar = false;
+    private WheelCollider[] rodas;
+
     // Configuração do Sensor de Chão
-    private Vector3    OrigemRaycast = new Vector3(0f, 0.1f, 0f);
+    private Vector3        OrigemRaycast = new Vector3(0f, 0.1f, 0f);
 
     // ─────────────────────────────────────────
     public override void Initialize()
     {
-        rb = GetComponent<Rigidbody>();
+        rb    = GetComponent<Rigidbody>();
+        rodas = GetComponentsInChildren<WheelCollider>();
         rb.centerOfMass = new Vector3(0f, -0.25f, 0.05f);
+        
+        // CORREÇÃO CRÍTICA ML-AGENTS: Impede que o robô hiberne e congele
+        rb.sleepThreshold = 0f; 
+
         posicaoInicialLocal = transform.localPosition;
         rotacaoInicialLocal = transform.localRotation;
 
@@ -60,21 +71,22 @@ public class SumoAgente : Agent
         emContatoComAdversario = false;
         podeMovimentar         = false;
 
-        WheelCollider[] wheelColliders = GetComponentsInChildren<WheelCollider>();
-        foreach (WheelCollider roda in wheelColliders)
+        foreach (WheelCollider roda in rodas)
         {
             roda.enabled     = false;
             roda.motorTorque = 0f;
             roda.brakeTorque = 0f;
         }
 
-        transform.localPosition = posicaoInicialLocal + new Vector3(0f, 0.2f, 0f);
-        transform.localRotation = rotacaoInicialLocal * Quaternion.Euler(0f, Random.Range(-20f, 20f), 0f);
+        transform.localPosition = posicaoInicialLocal + new Vector3(0f, 0.12f, 0f);
+        transform.localRotation = rotacaoInicialLocal
+            * Quaternion.Euler(0f, Random.Range(-20f, 20f), 0f);
 
-        foreach (WheelCollider roda in wheelColliders)
+        foreach (WheelCollider roda in rodas)
             roda.enabled = true;
 
-        rb.mass = Random.Range(3.0f, 3.2f);
+        rb.mass                = Random.Range(3.0f, 3.2f);
+        ultimaPosicaoExplorada = posicaoInicialLocal;
 
         if (adversario != null)
             posAdversarioAnterior = adversario.localPosition;
@@ -84,10 +96,25 @@ public class SumoAgente : Agent
 
     private System.Collections.IEnumerator AguardarFisica()
     {
-        yield return new WaitForFixedUpdate();
-        yield return new WaitForFixedUpdate();
-        yield return new WaitForFixedUpdate();
-        podeMovimentar = true;
+        for (int i = 0; i < 5; i++)
+            yield return new WaitForFixedUpdate();
+
+        float timeout = 0f;
+        while (timeout < 1.5f) 
+        {
+            foreach (WheelCollider roda in rodas)
+            {
+                if (roda.isGrounded)
+                {
+                    podeMovimentar = true;
+                    yield break; 
+                }
+            }
+            timeout += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        podeMovimentar = true; 
     }
 
     // ─────────────────────────────────────────
@@ -127,27 +154,38 @@ public class SumoAgente : Agent
         }
     }
 
+    private bool VerificarChao()
+    {
+        foreach (WheelCollider roda in rodas)
+            if (roda != null && roda.isGrounded) return true;
+        return false;
+    }
+
     // ─────────────────────────────────────────
     public override void OnActionReceived(ActionBuffers actions)
     {
         if (!podeMovimentar) return;
 
+        // Aviso de segurança: Avisa no console se o robô perdeu o oponente em vez de congelar em silêncio
+        if (adversario == null || centroArena == null)
+        {
+            Debug.LogWarning($"[{gameObject.name}] Congelado: Referência de Arena ou Adversário não encontrada!");
+            return;
+        }
+
         float aceleracao = actions.ContinuousActions[0];
         float giro       = actions.ContinuousActions[1];
         Vector3 angVel   = rb.angularVelocity;
 
-        // --- CAMADA 3: ESTABILIZADOR ANTI-TOMBAMENTO (Suavizado para evitar oscilação harmônica com as molas) ---
-        float fatorEstab = emContatoComAdversario ? 30f : 15f; 
-        float amortXZ    = emContatoComAdversario ? 8f : 4f;   
+        // 1. ESTABILIZADOR ANTI-TOMBAMENTO
+        float fatorEstab = emContatoComAdversario ? 30f : 15f;
+        float amortXZ    = emContatoComAdversario ? 8f  : 4f;
         Vector3 correcao = Vector3.Cross(transform.up, Vector3.up);
         rb.AddTorque(correcao * fatorEstab, ForceMode.Force);
         rb.AddTorque(new Vector3(-angVel.x * amortXZ, 0f, -angVel.z * amortXZ), ForceMode.Force);
 
-        // --- 2. SENSOR DE CHÃO SEGURO ---
-        bool isGrounded = Physics.Raycast(
-            transform.position + OrigemRaycast,
-            Vector3.down, out RaycastHit hit, 1.0f
-        ) && hit.collider.CompareTag("Piso");
+        // 2. DETECÇÃO DE CHÃO E MOVIMENTO
+        bool isGrounded = VerificarChao();
 
         if (isGrounded)
         {
@@ -159,22 +197,27 @@ public class SumoAgente : Agent
         }
         else
         {
-            rb.AddForce(Vector3.down * 40f * rb.mass, ForceMode.Force);
+            // A CURA DA ARMADILHA DE GRAVIDADE:
+            // Só aplica os 40g destrutivos se o robô estiver ativamente a voar para cima (y > 0.1)
+            // Se ele estiver a cair ou com a barriga presa no chão, a gravidade normal da Unity permite que ele escorregue e solte as rodas.
+            if (rb.linearVelocity.y > 0.1f)
+            {
+                rb.AddForce(Vector3.down * 40f * rb.mass, ForceMode.Force);
+            }
         }
 
-        // --- CAMADA 2: DOWNFORCE EXTRA DURANTE CONTATO ---
+        // 3. DOWNFORCE EXTRA DURANTE CONTATO
         if (emContatoComAdversario)
         {
-            float velImpacto   = rb.linearVelocity.magnitude;
+            float velImpacto     = rb.linearVelocity.magnitude;
             float downforceExtra = Mathf.Lerp(10f, 40f, velImpacto / velocidadeMaxima);
             rb.AddForce(Vector3.down * downforceExtra * rb.mass, ForceMode.Force);
 
-            // ÚNICA FORMA SEGURA DE AMORTECER A SUBIDA: Usando AddForce para combater a inércia, sem tocar na matriz de velocidade
             if (rb.linearVelocity.y > 0f)
                 rb.AddForce(Vector3.down * rb.linearVelocity.y * rb.mass * 20f, ForceMode.Force);
         }
 
-        // --- 4. ANTI-DRIFT PROPORCIONAL CRÍTICO (Afrouxado para não brigar com a física dos pneus) ---
+        // 4. ANTI-DRIFT PROPORCIONAL
         Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity);
         if (Mathf.Abs(velLocal.x) > 0.05f)
         {
@@ -183,16 +226,21 @@ public class SumoAgente : Agent
             rb.AddRelativeForce(Vector3.left * fatorDrift, ForceMode.Force);
         }
 
-        // ── Processamento de Recompensas ──
+        // ── Recompensas ──
         AddReward(-0.001f);
+
+        float distExplorada = Vector3.Distance(transform.localPosition, ultimaPosicaoExplorada);
+        if (distExplorada > distanciaExploracaoMinima)
+        {
+            AddReward(0.0002f);
+            ultimaPosicaoExplorada = transform.localPosition;
+        }
 
         if (Mathf.Abs(rb.angularVelocity.y) > 1f && rb.linearVelocity.magnitude < 0.3f)
             AddReward(-penaltiaGiroExcessivo * Mathf.Abs(rb.angularVelocity.y));
 
         if (emContatoComAdversario)
             AddReward(recompensaContatoContinuo);
-
-        if (adversario == null || centroArena == null) return;
 
         Vector3 centro2    = centroArena.localPosition;
         Vector3 dirParaAdv = (adversario.localPosition - transform.localPosition).normalized;
@@ -225,14 +273,10 @@ public class SumoAgente : Agent
     }
 
     // ─────────────────────────────────────────
-    // --- CAMADA 1: DETECÇÃO E DEFESA GEOMÉTRICA NO EVENTO DE FÍSICA ---
     private void OnCollisionStay(Collision col)
     {
         if (!col.collider.CompareTag("Lutador")) return;
 
-        // AQUI FOI REMOVIDA A ALTERAÇÃO DIRETA DE rb.linearVelocity PARA CURAR O TREMOR
-
-        // Varre os pontos geométricos do impacto para rebater forças angulares ascendentes
         foreach (ContactPoint contato in col.contacts)
         {
             if (contato.normal.y < -0.1f)
