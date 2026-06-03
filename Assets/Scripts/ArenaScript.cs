@@ -10,7 +10,7 @@ public class ArenaScript : MonoBehaviour
     public int totalRounds = 3;
 
     [Header("Regras de Tempo")]
-    public int maxStepsPorRound = 600;
+    public int maxStepsPorRound = 800;
     private int stepsAtual = 0;
 
     [Header("Recompensas de Round")]
