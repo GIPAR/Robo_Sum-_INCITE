@@ -52,8 +52,6 @@ public class SumoAgente : Agent
 
         BuscarAdversario();
     }
-
-    // ✅ Busca separada — pode ser chamada em qualquer momento
     private void BuscarAdversario()
     {
         foreach (GameObject g in GameObject.FindGameObjectsWithTag("Lutador"))
@@ -68,8 +66,7 @@ public class SumoAgente : Agent
 
     public override void OnEpisodeBegin()
     {
-        StopAllCoroutines(); // ✅ Mata coroutines antigas antes de criar nova
-
+        StopAllCoroutines(); 
         rb.linearVelocity  = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         emContatoComAdversario = false;
@@ -175,15 +172,11 @@ public class SumoAgente : Agent
         float aceleracao = actions.ContinuousActions[0];
         float giro       = actions.ContinuousActions[1];
         Vector3 angVel   = rb.angularVelocity;
-
-        // 1. ESTABILIZADOR — sempre roda independente de referências
         float fatorEstab = emContatoComAdversario ? 30f : 15f;
         float amortXZ    = emContatoComAdversario ? 8f  : 4f;
         Vector3 correcao = Vector3.Cross(transform.up, Vector3.up);
         rb.AddTorque(correcao * fatorEstab, ForceMode.Force);
         rb.AddTorque(new Vector3(-angVel.x * amortXZ, 0f, -angVel.z * amortXZ), ForceMode.Force);
-
-        // 2. MOVIMENTO — sempre roda independente de referências
         bool isGrounded = VerificarChao();
 
         if (isGrounded)
@@ -198,8 +191,6 @@ public class SumoAgente : Agent
         {
             rb.AddForce(Vector3.down * 40f * rb.mass, ForceMode.Force);
         }
-
-        // 3. DOWNFORCE EM CONTATO — sempre roda
         if (emContatoComAdversario)
         {
             float velImpacto     = rb.linearVelocity.magnitude;
@@ -211,8 +202,6 @@ public class SumoAgente : Agent
                     Vector3.down * rb.linearVelocity.y * rb.mass * 20f, ForceMode.Force
                 );
         }
-
-        // 4. ANTI-DRIFT — sempre roda
         Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity);
         if (Mathf.Abs(velLocal.x) > 0.05f)
         {
@@ -222,9 +211,6 @@ public class SumoAgente : Agent
             );
             rb.AddRelativeForce(Vector3.left * fatorDrift, ForceMode.Force);
         }
-
-        // ── RECOMPENSAS — só calcula se referências válidas ──
-        // ✅ Return aqui só bloqueia recompensas, não a física
         AddReward(-0.001f);
 
         float distExplorada = Vector3.Distance(
@@ -241,8 +227,6 @@ public class SumoAgente : Agent
 
         if (emContatoComAdversario)
             AddReward(recompensaContatoContinuo);
-
-        // ✅ Só as recompensas dependem das referências — física já rodou acima
         if (adversario == null || centroArena == null) return;
 
         Vector3 centro2    = centroArena.localPosition;

@@ -11,28 +11,23 @@ public class SumoAnimacaoVermelho : MonoBehaviour
 
     [Header("Curva de Animação")]
     public AnimationCurve curvaAnimacao;
-
     private Renderer[]             _renderers;
     private Color[]                _coresOriginais;
     private Coroutine              _animacaoAtiva;
-
-    // NOVO: MaterialPropertyBlock evita instanciar um novo Material por Renderer,
-    // eliminando o vazamento de memória que .material causa em builds.
     private MaterialPropertyBlock  _propBlock;
 
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
-    private static readonly int BaseColor     = Shader.PropertyToID("_BaseColor"); // URP
-    private static readonly int Color_        = Shader.PropertyToID("_Color");     // Built-in
+    private static readonly int BaseColor     = Shader.PropertyToID("_BaseColor"); 
+    private static readonly int Color_        = Shader.PropertyToID("_Color");     
 
     private void Awake()
     {
         _renderers      = GetComponentsInChildren<Renderer>();
         _coresOriginais = new Color[_renderers.Length];
-        _propBlock      = new MaterialPropertyBlock(); // NOVO
+        _propBlock      = new MaterialPropertyBlock(); 
 
         for (int i = 0; i < _renderers.Length; i++)
         {
-            // NOVO: lê cor pelo bloco, sem criar instância de material
             _renderers[i].GetPropertyBlock(_propBlock);
             _coresOriginais[i] = _renderers[i].sharedMaterial.color;
         }
@@ -73,11 +68,9 @@ public class SumoAnimacaoVermelho : MonoBehaviour
                     new Color(intensidadeVermelho, 0f, 0f, _coresOriginais[i].a),
                     fator
                 );
-
-                // NOVO: aplica via PropertyBlock — zero alocação de material
                 _renderers[i].GetPropertyBlock(_propBlock);
                 _propBlock.SetColor(Color_, corAtual);
-                _propBlock.SetColor(BaseColor, corAtual); // cobre URP
+                _propBlock.SetColor(BaseColor, corAtual); 
 
                 if (_renderers[i].sharedMaterial.IsKeywordEnabled("_EMISSION"))
                     _propBlock.SetColor(EmissionColor, corAtual * (fator * 2f));
@@ -91,8 +84,6 @@ public class SumoAnimacaoVermelho : MonoBehaviour
         ResetarCores();
         _animacaoAtiva = null;
     }
-
-    // NOVO: extraído para reutilizar em OnDisable sem duplicar código
     private void ResetarCores()
     {
         for (int i = 0; i < _renderers.Length; i++)
@@ -104,7 +95,6 @@ public class SumoAnimacaoVermelho : MonoBehaviour
             _renderers[i].SetPropertyBlock(_propBlock);
         }
     }
-
     private void OnDisable()
     {
         if (_animacaoAtiva != null)
