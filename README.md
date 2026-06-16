@@ -37,7 +37,7 @@ Para iniciar a comunicação entre a rede neural no Python e o ambiente 3D na Un
    cd "D:\LocalDoArquivo\RoboSumo"
 
 3. Inicie o comando de treinamento utilizando o seu arquivo de configuração:
-   mlagents-learn trainer_config.yaml --run-id=treino_01
+   mlagents-learn trainer_config.yaml --run-id=treino_7
 
 4. **Iniciando a Simulação:**
    Assim que o terminal exibir a mensagem informando que está ouvindo a porta (ex: "Listening on port 5004"), **não feche o Anaconda**. Deixe a janela aberta em segundo plano.
@@ -45,6 +45,22 @@ Para iniciar a comunicação entre a rede neural no Python e o ambiente 3D na Un
 5. Volte para a janela da **Unity** e pressione o botão **Play** no topo do editor. 
 
 Pronto! Agora você poderá assistir aos robôs batalhando e aprendendo em tempo real.
+
+---
+
+## 📊 Como acompanhar o treinamento (TensorBoard)
+
+Para visualizar os gráficos de inteligência e aprendizado da sua IA em tempo real (como pontuação e duração das lutas), utilize o TensorBoard:
+
+1. Abra uma **nova** janela do Anaconda Prompt (não feche a janela que está rodando o treinamento da Unity).
+2. Ative o ambiente virtual novamente:
+   conda activate mlagents
+3. Navegue até a mesma pasta do projeto:
+   cd "D:\LocalDoArquivo\RoboSumo"
+4. Digite o comando abaixo para iniciar o servidor do TensorBoard:
+   tensorboard --logdir results
+5. Abra o seu navegador de internet (Chrome, Edge, Opera, etc.) e acesse o seguinte endereço:
+   http://localhost:6006
 
 ---
 
