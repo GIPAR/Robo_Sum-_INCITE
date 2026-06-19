@@ -17,14 +17,13 @@ public class SumoAgente : Agent
     public float       raioDaArena = 10f;
 
     [Header("Recompensas")]
-    public float recompensaEmpurrao        = 0.003f;
-    public float recompensaOrientacao      = 0.0003f;
-    public float penaltiaGiroExcessivo     = 0.0005f;
-    public float recompensaContatoContinuo = 0.001f;
-    public float recompensaEmbate          = 0.01f;
+    public float recompensaEmpurrao    = 0.003f;
+    public float recompensaOrientacao  = 0.0003f;
+    public float penaltiaGiroExcessivo = 0.0005f;
+    public float recompensaEmbate      = 0.01f;
 
-    [Header("Exploração")]
-    public float distanciaExploracaoMinima = 1.5f;
+    // removidos: recompensaContatoContinuo, distanciaExploracaoMinima
+    // reward de vitória/derrota é responsabilidade do ArenaScript
 
     private Rigidbody       rb;
     private Rigidbody       rbAdversario;
@@ -32,26 +31,26 @@ public class SumoAgente : Agent
     private Vector3         posicaoInicialLocal;
     private Quaternion      rotacaoInicialLocal;
     private Vector3         posAdversarioAnterior;
-    private Vector3         ultimaPosicaoExplorada;
     private bool            emContatoComAdversario;
     private bool            podeMovimentar = false;
     private WheelCollider[] rodas;
-
-    private static readonly Vector3 OrigemRaycast = new Vector3(0f, 0.1f, 0f);
 
     // ─────────────────────────────────────────
     public override void Initialize()
     {
         rb    = GetComponent<Rigidbody>();
         rodas = GetComponentsInChildren<WheelCollider>();
+
         rb.centerOfMass   = new Vector3(0f, -0.25f, 0.05f);
         rb.sleepThreshold = 0f;
+        rb.mass           = 3.1f;   // fixo — sem variação por episódio
 
         posicaoInicialLocal = transform.localPosition;
         rotacaoInicialLocal = transform.localRotation;
 
         BuscarAdversario();
     }
+
     private void BuscarAdversario()
     {
         foreach (GameObject g in GameObject.FindGameObjectsWithTag("Lutador"))
@@ -66,13 +65,12 @@ public class SumoAgente : Agent
 
     public override void OnEpisodeBegin()
     {
-        StopAllCoroutines(); 
+        StopAllCoroutines();
         rb.linearVelocity  = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         emContatoComAdversario = false;
         podeMovimentar         = false;
 
-        // ✅ Re-busca adversário se perdeu referência
         if (adversario == null) BuscarAdversario();
 
         foreach (WheelCollider roda in rodas)
@@ -88,9 +86,6 @@ public class SumoAgente : Agent
 
         foreach (WheelCollider roda in rodas)
             roda.enabled = true;
-
-        rb.mass                = Random.Range(3.0f, 3.2f);
-        ultimaPosicaoExplorada = posicaoInicialLocal;
 
         if (adversario != null)
             posAdversarioAnterior = adversario.localPosition;
@@ -114,7 +109,6 @@ public class SumoAgente : Agent
             timeout += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
-
         podeMovimentar = true;
     }
 
@@ -169,14 +163,17 @@ public class SumoAgente : Agent
     {
         if (!podeMovimentar) return;
 
-        float aceleracao = actions.ContinuousActions[0];
-        float giro       = actions.ContinuousActions[1];
-        Vector3 angVel   = rb.angularVelocity;
-        float fatorEstab = emContatoComAdversario ? 30f : 15f;
-        float amortXZ    = emContatoComAdversario ? 8f  : 4f;
-        Vector3 correcao = Vector3.Cross(transform.up, Vector3.up);
+        float   aceleracao = actions.ContinuousActions[0];
+        float   giro       = actions.ContinuousActions[1];
+        Vector3 angVel     = rb.angularVelocity;
+
+        // ── Estabilização angular ──
+        float   fatorEstab = emContatoComAdversario ? 30f : 15f;
+        float   amortXZ    = emContatoComAdversario ? 8f  : 4f;
+        Vector3 correcao   = Vector3.Cross(transform.up, Vector3.up);
         rb.AddTorque(correcao * fatorEstab, ForceMode.Force);
         rb.AddTorque(new Vector3(-angVel.x * amortXZ, 0f, -angVel.z * amortXZ), ForceMode.Force);
+
         bool isGrounded = VerificarChao();
 
         if (isGrounded)
@@ -191,6 +188,8 @@ public class SumoAgente : Agent
         {
             rb.AddForce(Vector3.down * 40f * rb.mass, ForceMode.Force);
         }
+
+        // ── Downforce extra em contato ──
         if (emContatoComAdversario)
         {
             float velImpacto     = rb.linearVelocity.magnitude;
@@ -202,46 +201,43 @@ public class SumoAgente : Agent
                     Vector3.down * rb.linearVelocity.y * rb.mass * 20f, ForceMode.Force
                 );
         }
-        Vector3 velLocal = transform.InverseTransformDirection(rb.linearVelocity);
-        if (Mathf.Abs(velLocal.x) > 0.05f)
+
+        // ── Anti-drift proporcional ──
+        Vector3 velLocalDrift = transform.InverseTransformDirection(rb.linearVelocity);
+        if (Mathf.Abs(velLocalDrift.x) > 0.05f)
         {
             float giroAbs    = Mathf.Clamp01(Mathf.Abs(giro));
             float fatorDrift = Mathf.Clamp(
-                velLocal.x * rb.mass * Mathf.Lerp(3f, 1f, giroAbs), -50f, 50f
+                velLocalDrift.x * rb.mass * Mathf.Lerp(3f, 1f, giroAbs), -50f, 50f
             );
             rb.AddRelativeForce(Vector3.left * fatorDrift, ForceMode.Force);
         }
+
+        // ── Penalidade base por step (incentiva terminar o round) ──
         AddReward(-0.001f);
 
-        float distExplorada = Vector3.Distance(
-            transform.localPosition, ultimaPosicaoExplorada
-        );
-        if (distExplorada > distanciaExploracaoMinima)
-        {
-            AddReward(0.0002f);
-            ultimaPosicaoExplorada = transform.localPosition;
-        }
-
+        // ── Anti-spinning: penaliza giro no lugar sem deslocamento ──
         if (Mathf.Abs(angVel.y) > 1f && rb.linearVelocity.magnitude < 0.3f)
             AddReward(-penaltiaGiroExcessivo * Mathf.Abs(angVel.y));
 
-        if (emContatoComAdversario)
-            AddReward(recompensaContatoContinuo);
         if (adversario == null || centroArena == null) return;
 
-        Vector3 centro2    = centroArena.localPosition;
-        Vector3 dirParaAdv = (adversario.localPosition - transform.localPosition).normalized;
+        Vector3 centro2     = centroArena.localPosition;
+        Vector3 dirParaAdv  = (adversario.localPosition - transform.localPosition).normalized;
         float   alinhamento = Vector3.Dot(transform.forward, dirParaAdv);
 
+        // ── Orientação: reward por encarar o adversário em movimento ──
         if (alinhamento > 0.5f && rb.linearVelocity.magnitude > 0.3f)
             AddReward(recompensaOrientacao * alinhamento);
 
+        // ── Aproximação: reward por avançar em direção ao adversário ──
         if (!emContatoComAdversario)
         {
             float velAprox = Vector3.Dot(rb.linearVelocity, dirParaAdv);
             if (velAprox > 0.5f) AddReward(velAprox * 0.002f);
         }
 
+        // ── Empurrão: reward por deslocar o adversário para a borda ──
         if (emContatoComAdversario)
         {
             Vector3 dirBorda = (adversario.localPosition - centro2).normalized;
@@ -276,6 +272,7 @@ public class SumoAgente : Agent
         }
     }
 
+    // Toque na borda → notifica a arena, que aplicará rewards e EndEpisode
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Borda")) arena?.IniciarRound(this);
@@ -286,6 +283,7 @@ public class SumoAgente : Agent
         if (col.collider.CompareTag("Lutador"))
         {
             emContatoComAdversario = true;
+
             float impacto = Mathf.Clamp(rb.linearVelocity.magnitude, 0f, 5f);
             AddReward(impacto * recompensaEmbate);
 
