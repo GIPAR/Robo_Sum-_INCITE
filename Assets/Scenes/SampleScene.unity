@@ -326,9 +326,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &134375725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5488,9 +5488,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &194628953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5603,9 +5603,9 @@ MonoBehaviour:
     VectorActionDescriptions: []
     VectorActionSpaceType: 1
     hasUpgradedBrainParametersWithActionSpec: 1
-  m_Model: {fileID: 0}
+  m_Model: {fileID: 5022602860645237092, guid: e277b7ac9e325f64d95aeebbc97fed87, type: 3}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 2
   m_BehaviorName: SumoBrain
   TeamId: 0
   m_UseChildSensors: 1
@@ -5905,7 +5905,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &254501795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6242,9 +6242,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &344339149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18187,9 +18187,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &698932937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18447,7 +18447,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &712278366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50535,9 +50535,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &1331266343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51013,9 +51013,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &1367077959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51040,7 +51040,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: SumoBrain
   TeamId: 0
   m_UseChildSensors: 1
@@ -76609,7 +76609,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1669324292
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76960,9 +76960,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &1740238720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83782,9 +83782,9 @@ MonoBehaviour:
   recompensaEmpurrao: 0.003
   recompensaOrientacao: 0.0003
   penaltiaGiroExcessivo: 0.0005
-  recompensaContatoContinuo: 0.001
   recompensaEmbate: 0.01
-  distanciaExploracaoMinima: 1.5
+  stepsParaCurriculumCompleto: 5000000
+  distanciaInicialMaxima: 0.85
 --- !u!114 &2037552464
 MonoBehaviour:
   m_ObjectHideFlags: 0

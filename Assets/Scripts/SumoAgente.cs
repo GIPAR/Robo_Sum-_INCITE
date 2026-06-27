@@ -28,6 +28,9 @@ public class SumoAgente : Agent
     [Tooltip("Distância máxima do centro (fração do raio) onde o adversário pode nascer no INÍCIO do curriculum (steps=0).")]
     [Range(0f, 0.95f)]
     public float distanciaInicialMaxima = 0.85f;
+    [Tooltip("Separação angular mínima garantida entre os dois robôs no spawn, em graus. Evita sobreposição mesmo com offsets grandes.")]
+    [Range(60f, 180f)]
+    public float separacaoAngularMinima = 120f;
 
     private Rigidbody       rb;
     private Rigidbody       rbAdversario;
@@ -39,6 +42,10 @@ public class SumoAgente : Agent
     private bool            emContatoComAdversario;
     private bool            podeMovimentar = false;
     private WheelCollider[] rodas;
+
+    private static float anguloCompartilhadoEpisodioAtual = 0f;
+    private static int   episodioDoAnguloCalculado        = -1;
+    private static int   contadorEpisodiosGlobal          = 0;
 
     // ─────────────────────────────────────────
     public override void Initialize()
@@ -85,12 +92,9 @@ public class SumoAgente : Agent
             roda.motorTorque = 0f;
             roda.brakeTorque = 0f;
         }
+        bool souLider = (adversario == null) || (GetInstanceID() < scriptAdversario.GetInstanceID());
 
-        // ── Curriculum learning: somente o agente "líder" (ex: o que tem
-        // menor InstanceID) decide o spawn nesta rodada, para não haver
-        // dois agentes tentando reposicionar um ao outro no mesmo frame.
-        // Cada agente ainda reposiciona apenas A SI MESMO.
-        Vector3 offsetCurriculum = CalcularOffsetCurriculum();
+        Vector3 offsetCurriculum = CalcularOffsetCurriculum(souLider);
 
         transform.localPosition = posicaoInicialLocal + offsetCurriculum + new Vector3(0f, 0.12f, 0f);
         transform.localRotation = rotacaoInicialLocal
@@ -104,29 +108,32 @@ public class SumoAgente : Agent
 
         StartCoroutine(AguardarFisica());
     }
-
-    // Calcula um deslocamento radial em direção à borda, cuja magnitude
-    // diminui conforme o número de steps de treino avança. No início,
-    // o agente pode nascer perto da borda (mais fácil de finalizar);
-    // no final, sempre nasce no spawn original (comportamento padrão).
-    private Vector3 CalcularOffsetCurriculum()
+    private Vector3 CalcularOffsetCurriculum(bool souLider)
     {
         if (stepsParaCurriculumCompleto <= 0f) return Vector3.zero;
-
         float stepAtual  = (float)Academy.Instance.StepCount;
         float progresso  = Mathf.Clamp01(stepAtual / stepsParaCurriculumCompleto);
-
-        // fraçãoBorda vai de distanciaInicialMaxima (progresso=0) até 0 (progresso=1)
         float fracaoBorda = Mathf.Lerp(distanciaInicialMaxima, 0f, progresso);
         if (fracaoBorda <= 0.001f) return Vector3.zero;
 
-        // Direção radial aleatória a partir da posição de spawn original
-        float anguloAleatorio = Random.Range(0f, Mathf.PI * 2f);
-        Vector3 direcaoRadial = new Vector3(Mathf.Cos(anguloAleatorio), 0f, Mathf.Sin(anguloAleatorio));
+        float anguloGraus;
+
+        if (souLider)
+        {
+            contadorEpisodiosGlobal++;
+            anguloGraus = Random.Range(0f, 360f);
+            anguloCompartilhadoEpisodioAtual = anguloGraus;
+            episodioDoAnguloCalculado        = contadorEpisodiosGlobal;
+        }
+        else
+        {
+            anguloGraus = anguloCompartilhadoEpisodioAtual + separacaoAngularMinima;
+        }
+
+        float anguloRad        = anguloGraus * Mathf.Deg2Rad;
+        Vector3 direcaoRadial  = new Vector3(Mathf.Cos(anguloRad), 0f, Mathf.Sin(anguloRad));
 
         return direcaoRadial * (fracaoBorda * raioDaArena * 0.5f);
-        // *0.5f: limita o offset a metade do raio no máximo, evitando
-        // que o agente nasça fora da arena mesmo em distanciaInicialMaxima alta.
     }
 
     private System.Collections.IEnumerator AguardarFisica()
@@ -224,8 +231,6 @@ public class SumoAgente : Agent
         {
             rb.AddForce(Vector3.down * 40f * rb.mass, ForceMode.Force);
         }
-
-        // ── Downforce extra em contato ──
         if (emContatoComAdversario)
         {
             float velImpacto     = rb.linearVelocity.magnitude;
@@ -237,8 +242,6 @@ public class SumoAgente : Agent
                     Vector3.down * rb.linearVelocity.y * rb.mass * 20f, ForceMode.Force
                 );
         }
-
-        // ── Anti-drift proporcional ──
         Vector3 velLocalDrift = transform.InverseTransformDirection(rb.linearVelocity);
         if (Mathf.Abs(velLocalDrift.x) > 0.05f)
         {
@@ -248,32 +251,20 @@ public class SumoAgente : Agent
             );
             rb.AddRelativeForce(Vector3.left * fatorDrift, ForceMode.Force);
         }
-
-        // ── Penalidade base por step (incentiva terminar o round) ──
         AddReward(-0.001f);
-
-        // ── Anti-spinning: penaliza giro no lugar sem deslocamento ──
         if (Mathf.Abs(angVel.y) > 1f && rb.linearVelocity.magnitude < 0.3f)
             AddReward(-penaltiaGiroExcessivo * Mathf.Abs(angVel.y));
-
         if (adversario == null || centroArena == null) return;
-
         Vector3 centro2     = centroArena.localPosition;
         Vector3 dirParaAdv  = (adversario.localPosition - transform.localPosition).normalized;
         float   alinhamento = Vector3.Dot(transform.forward, dirParaAdv);
-
-        // ── Orientação: reward por encarar o adversário em movimento ──
         if (alinhamento > 0.5f && rb.linearVelocity.magnitude > 0.3f)
             AddReward(recompensaOrientacao * alinhamento);
-
-        // ── Aproximação: reward por avançar em direção ao adversário ──
         if (!emContatoComAdversario)
         {
             float velAprox = Vector3.Dot(rb.linearVelocity, dirParaAdv);
             if (velAprox > 0.5f) AddReward(velAprox * 0.002f);
         }
-
-        // ── Empurrão: reward por deslocar o adversário para a borda ──
         if (emContatoComAdversario)
         {
             Vector3 dirBorda = (adversario.localPosition - centro2).normalized;
@@ -307,8 +298,6 @@ public class SumoAgente : Agent
                 );
         }
     }
-
-    // Toque na borda → notifica a arena, que aplicará rewards e EndEpisode
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Borda")) arena?.IniciarRound(this);
@@ -319,14 +308,7 @@ public class SumoAgente : Agent
         if (col.collider.CompareTag("Lutador"))
         {
             emContatoComAdversario = true;
-
             float impacto = Mathf.Clamp(rb.linearVelocity.magnitude, 0f, 5f);
-
-            // ── Peso por ângulo de impacto ──
-            // fatorAngular: 0 = impacto perpendicular/lateral, 1 = impacto frontal total.
-            // Impactos puramente laterais ainda recebem 40% do reward de embate
-            // (não são inúteis — podem desestabilizar o adversário), mas impactos
-            // frontais — que de fato tendem a empurrar para a borda — valem mais.
             float fatorAngular = 0.4f;
             if (adversario != null)
             {
@@ -334,10 +316,7 @@ public class SumoAgente : Agent
                 float   dot        = Mathf.Clamp01(Vector3.Dot(transform.forward, dirParaAdv));
                 fatorAngular = Mathf.Lerp(0.4f, 1f, dot);
             }
-
             AddReward(impacto * recompensaEmbate * fatorAngular);
-
-            // Bônus adicional já existente para impactos bem alinhados
             if (adversario != null)
             {
                 Vector3 dir = (adversario.localPosition - transform.localPosition).normalized;
