@@ -1,0 +1,66 @@
+{
+    "SumoBrain": {
+        "checkpoints": [
+            {
+                "steps": 8499986,
+                "file_path": "results\\treino_12\\SumoBrain\\SumoBrain-8499986.onnx",
+                "reward": 2.0219360001009368,
+                "creation_time": 1782233950.6141946,
+                "auxillary_file_paths": [
+                    "results\\treino_12\\SumoBrain\\SumoBrain-8499986.pt"
+                ]
+            },
+            {
+                "steps": 8999946,
+                "file_path": "results\\treino_12\\SumoBrain\\SumoBrain-8999946.onnx",
+                "reward": 2.0546613780351786,
+                "creation_time": 1782234635.3617756,
+                "auxillary_file_paths": [
+                    "results\\treino_12\\SumoBrain\\SumoBrain-8999946.pt"
+                ]
+            },
+            {
+                "steps": 9499980,
+                "file_path": "results\\treino_12\\SumoBrain\\SumoBrain-9499980.onnx",
+                "reward": 2.163863706828974,
+                "creation_time": 1782235288.949312,
+                "auxillary_file_paths": [
+                    "results\\treino_12\\SumoBrain\\SumoBrain-9499980.pt"
+                ]
+            },
+            {
+                "steps": 9999962,
+                "file_path": "results\\treino_12\\SumoBrain\\SumoBrain-9999962.onnx",
+                "reward": 2.1484752617529073,
+                "creation_time": 1782235955.171217,
+                "auxillary_file_paths": [
+                    "results\\treino_12\\SumoBrain\\SumoBrain-9999962.pt"
+                ]
+            },
+            {
+                "steps": 10000126,
+                "file_path": "results\\treino_12\\SumoBrain\\SumoBrain-10000126.onnx",
+                "reward": 2.1456198974181553,
+                "creation_time": 1782235955.3178763,
+                "auxillary_file_paths": [
+                    "results\\treino_12\\SumoBrain\\SumoBrain-10000126.pt"
+                ]
+            }
+        ],
+        "elo": -216.33992890516654,
+        "final_checkpoint": {
+            "steps": 10000126,
+            "file_path": "results\\treino_12\\SumoBrain.onnx",
+            "reward": 2.1456198974181553,
+            "creation_time": 1782235955.3178763,
+            "auxillary_file_paths": [
+                "results\\treino_12\\SumoBrain\\SumoBrain-10000126.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.2.0.dev0",
+        "torch_version": "2.2.2+cu121"
+    }
+}

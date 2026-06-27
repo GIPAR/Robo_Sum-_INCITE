@@ -22,11 +22,16 @@ public class SumoAgente : Agent
     public float penaltiaGiroExcessivo = 0.0005f;
     public float recompensaEmbate      = 0.01f;
 
-    // removidos: recompensaContatoContinuo, distanciaExploracaoMinima
-    // reward de vitória/derrota é responsabilidade do ArenaScript
+    [Header("Curriculum Learning — Spawn do Adversário")]
+    [Tooltip("Steps de treino até o spawn ficar 100% central (padrão). Antes disso, o adversário nasce mais perto da borda.")]
+    public float stepsParaCurriculumCompleto = 5_000_000f;
+    [Tooltip("Distância máxima do centro (fração do raio) onde o adversário pode nascer no INÍCIO do curriculum (steps=0).")]
+    [Range(0f, 0.95f)]
+    public float distanciaInicialMaxima = 0.85f;
 
     private Rigidbody       rb;
     private Rigidbody       rbAdversario;
+    private SumoAgente       scriptAdversario;
     private Transform       adversario;
     private Vector3         posicaoInicialLocal;
     private Quaternion      rotacaoInicialLocal;
@@ -56,8 +61,9 @@ public class SumoAgente : Agent
         foreach (GameObject g in GameObject.FindGameObjectsWithTag("Lutador"))
         {
             if (g == gameObject) continue;
-            adversario   = g.transform;
-            rbAdversario = g.GetComponent<Rigidbody>();
+            adversario       = g.transform;
+            rbAdversario     = g.GetComponent<Rigidbody>();
+            scriptAdversario = g.GetComponent<SumoAgente>();
             return;
         }
         Debug.LogWarning($"[{gameObject.name}] Adversário não encontrado!");
@@ -80,7 +86,13 @@ public class SumoAgente : Agent
             roda.brakeTorque = 0f;
         }
 
-        transform.localPosition = posicaoInicialLocal + new Vector3(0f, 0.12f, 0f);
+        // ── Curriculum learning: somente o agente "líder" (ex: o que tem
+        // menor InstanceID) decide o spawn nesta rodada, para não haver
+        // dois agentes tentando reposicionar um ao outro no mesmo frame.
+        // Cada agente ainda reposiciona apenas A SI MESMO.
+        Vector3 offsetCurriculum = CalcularOffsetCurriculum();
+
+        transform.localPosition = posicaoInicialLocal + offsetCurriculum + new Vector3(0f, 0.12f, 0f);
         transform.localRotation = rotacaoInicialLocal
             * Quaternion.Euler(0f, Random.Range(-20f, 20f), 0f);
 
@@ -91,6 +103,30 @@ public class SumoAgente : Agent
             posAdversarioAnterior = adversario.localPosition;
 
         StartCoroutine(AguardarFisica());
+    }
+
+    // Calcula um deslocamento radial em direção à borda, cuja magnitude
+    // diminui conforme o número de steps de treino avança. No início,
+    // o agente pode nascer perto da borda (mais fácil de finalizar);
+    // no final, sempre nasce no spawn original (comportamento padrão).
+    private Vector3 CalcularOffsetCurriculum()
+    {
+        if (stepsParaCurriculumCompleto <= 0f) return Vector3.zero;
+
+        float stepAtual  = (float)Academy.Instance.StepCount;
+        float progresso  = Mathf.Clamp01(stepAtual / stepsParaCurriculumCompleto);
+
+        // fraçãoBorda vai de distanciaInicialMaxima (progresso=0) até 0 (progresso=1)
+        float fracaoBorda = Mathf.Lerp(distanciaInicialMaxima, 0f, progresso);
+        if (fracaoBorda <= 0.001f) return Vector3.zero;
+
+        // Direção radial aleatória a partir da posição de spawn original
+        float anguloAleatorio = Random.Range(0f, Mathf.PI * 2f);
+        Vector3 direcaoRadial = new Vector3(Mathf.Cos(anguloAleatorio), 0f, Mathf.Sin(anguloAleatorio));
+
+        return direcaoRadial * (fracaoBorda * raioDaArena * 0.5f);
+        // *0.5f: limita o offset a metade do raio no máximo, evitando
+        // que o agente nasça fora da arena mesmo em distanciaInicialMaxima alta.
     }
 
     private System.Collections.IEnumerator AguardarFisica()
@@ -285,8 +321,23 @@ public class SumoAgente : Agent
             emContatoComAdversario = true;
 
             float impacto = Mathf.Clamp(rb.linearVelocity.magnitude, 0f, 5f);
-            AddReward(impacto * recompensaEmbate);
 
+            // ── Peso por ângulo de impacto ──
+            // fatorAngular: 0 = impacto perpendicular/lateral, 1 = impacto frontal total.
+            // Impactos puramente laterais ainda recebem 40% do reward de embate
+            // (não são inúteis — podem desestabilizar o adversário), mas impactos
+            // frontais — que de fato tendem a empurrar para a borda — valem mais.
+            float fatorAngular = 0.4f;
+            if (adversario != null)
+            {
+                Vector3 dirParaAdv = (adversario.localPosition - transform.localPosition).normalized;
+                float   dot        = Mathf.Clamp01(Vector3.Dot(transform.forward, dirParaAdv));
+                fatorAngular = Mathf.Lerp(0.4f, 1f, dot);
+            }
+
+            AddReward(impacto * recompensaEmbate * fatorAngular);
+
+            // Bônus adicional já existente para impactos bem alinhados
             if (adversario != null)
             {
                 Vector3 dir = (adversario.localPosition - transform.localPosition).normalized;
