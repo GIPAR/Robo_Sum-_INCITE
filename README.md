@@ -10,7 +10,7 @@ O treinamento é feito utilizando a engine da Unity em conjunto com o framework 
 
 Para executar este projeto na sua máquina, você precisará das seguintes ferramentas instaladas:
 
-- **Unity Engine**: Uma versão recente da Unity (preferencialmente a mesma versão utilizada para criar o projeto).
+- **Unity Engine**: Uma versão recente da Unity (v6000.0.44f1).
 - **Anaconda** (ou Miniconda): Gerenciador de ambientes virtuais Python.
 - **Unity ML-Agents**: Biblioteca do ML-Agents devidamente instalada no seu ambiente virtual do Anaconda.
 
