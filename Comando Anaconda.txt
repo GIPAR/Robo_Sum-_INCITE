@@ -1,0 +1,6 @@
+Comando Anaconda:
+conda activate mlagents
+cd "local do arquivo"
+tensorboard --logdir results
+mlagents-learn trainer_config.yaml --run-id=treino_10
+mlagents-learn trainer_config.yaml --run-id=treino_10 --resume
